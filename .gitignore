@@ -4,3 +4,4 @@ data/*.xlsx
 .env.*
 *.pem
 *.key
+games/ThaiW/Build/ThaiW_WebGL.data
