@@ -1,0 +1,6 @@
+data/students.json
+data/*.xlsx
+.env
+.env.*
+*.pem
+*.key

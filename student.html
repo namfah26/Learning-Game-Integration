@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ศูนย์เกมสำหรับนักเรียน</title>
+<link rel="stylesheet" href="./css/app.css">
+<style>
+.student-hero{background:linear-gradient(135deg,#54c7d9,#8b64d9 55%,#ee82bd)}
+.student-hero h1{font-size:31px}.student-game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
+.student-card{background:#fff;border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column}.student-card img{width:100%;aspect-ratio:16/9;object-fit:cover;background:#eef0ff}.student-card-body{padding:17px;display:flex;flex-direction:column;gap:9px;flex:1}.student-card h3{margin:0;color:#3f478f;font-size:20px}.student-card p{margin:0;color:#6f778b;line-height:1.6;font-size:14px;min-height:44px}
+</style>
+</head>
+<body>
+<div id="studentLogin" class="login-screen">
+  <div class="login-card">
+    <div class="login-icon">🎮</div>
+    <h1>เข้าสู่ห้องเกม</h1>
+    <p>กรอกรหัสนักเรียนของคุณเพื่อดูเกมที่คุณครูจัดเตรียมไว้</p>
+    <div id="studentLoginError" class="error-box"></div>
+    <div class="field"><label>รหัสนักเรียน</label><input id="studentLoginId" inputmode="numeric" autocomplete="off" placeholder="เช่น 6901"></div>
+    <button class="btn btn-primary btn-block" style="margin-top:16px" onclick="StudentApp.login()">เข้าสู่ระบบและเริ่มเล่น</button>
+    <div class="login-back"><a href="./index.html">← กลับไปเลือกประเภทผู้ใช้</a></div>
+  </div>
+</div>
+
+<div id="studentApp" class="hidden">
+  <main class="shell">
+    <div class="topbar">
+      <div class="brand"><span class="brand-badge">🎮</span><span>ห้องเกมของฉัน</span></div>
+      <div class="top-actions"><a class="btn btn-ghost" href="./index.html">← หน้าแรก</a><button class="btn btn-danger" onclick="StudentApp.logout()">ออกจากระบบ</button></div>
+    </div>
+    <header class="hero student-hero">
+      <h1>สวัสดี <span id="studentWelcomeName">นักเรียน</span> 👋</h1>
+      <p>เลือกเกมที่อยากเล่นได้เลย ผลการเล่นจะถูกบันทึกให้คุณครูและผู้ปกครองโดยอัตโนมัติ</p>
+    </header>
+    <div class="notice" style="margin-bottom:18px">หลังเล่นจบ นักเรียนจะเห็นสรุปผลแบบง่ายในเกม ส่วนข้อมูลรายละเอียดจะเก็บไว้ให้คุณครูและผู้ปกครองดู</div>
+    <section>
+      <div class="profile-head" style="margin-bottom:14px"><div><h2 style="margin:0;color:#40499b">เกมทั้งหมด</h2><div class="hint">คำอธิบายเกมมาจากข้อมูลที่คุณครูกำหนด</div></div><button class="btn btn-soft" onclick="StudentApp.refresh()">↻ อัปเดตเกม</button></div>
+      <div id="studentGameGrid" class="student-game-grid"></div>
+    </section>
+  </main>
+</div>
+<div class="toast" id="studentToast"></div>
+<script src="./js/app-data.js"></script>
+<script src="./js/student.js"></script>
+</body>
+</html>

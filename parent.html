@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ระบบผู้ปกครอง</title>
+<link rel="stylesheet" href="./css/app.css">
+</head>
+<body>
+<div id="parentLogin" class="login-screen">
+  <div class="login-card">
+    <div class="login-icon">👨‍👩‍👧</div>
+    <h1>เข้าสู่ระบบผู้ปกครอง</h1>
+    <p>กรอกรหัสนักเรียนและวันเกิดของบุตรหลานเพื่อเข้าสู่ระบบ</p>
+    <div id="parentLoginError" class="error-box"></div>
+    <div class="field"><label>รหัสนักเรียน</label><input id="parentStudentId" autocomplete="username"></div>
+    <div class="field" style="margin-top:12px"><label>วันเกิดของบุตรหลาน</label><input id="parentStudentDob" type="date"></div>
+    <button class="btn btn-primary btn-block" style="margin-top:16px" onclick="ParentApp.login()">เข้าสู่ระบบ</button>
+    <div class="login-back"><a href="./index.html">← กลับไปเลือกประเภทผู้ใช้</a></div>
+  </div>
+</div>
+
+<div id="parentApp" class="hidden">
+  <main class="shell">
+    <div class="topbar">
+      <div class="brand"><span class="brand-badge">👨‍👩‍👧</span><span>ผลการเรียนรู้ของบุตรหลาน</span></div>
+      <div class="top-actions"><a class="btn btn-ghost" href="./index.html">← หน้าแรก</a><button class="btn btn-danger" onclick="ParentApp.logout()">ออกจากระบบ</button></div>
+    </div>
+
+    <header class="hero">
+      <h1>สวัสดีผู้ปกครอง</h1>
+      <p>ติดตามเกมที่บุตรหลานเล่น ผลการเรียนรู้ และปรับปรุงข้อมูลติดต่อได้จากหน้านี้</p>
+    </header>
+
+    <section id="parentProfile"></section>
+    <section id="parentSummary"></section>
+    <section class="card"><h2>เกมและผลการเรียนรู้</h2><div id="parentGameCards"></div></section>
+    <section id="parentGameDetail"></section>
+  </main>
+</div>
+
+<div class="modal" id="profileEditModal"><div class="modal-card" style="width:min(700px,96vw)"><div class="modal-head"><h2>แก้ไขข้อมูลติดต่อ</h2><button class="icon-btn" onclick="ParentApp.closeEdit()">✕</button></div>
+  <div class="notice">รหัสนักเรียน ชื่อ และวันเกิดเป็นข้อมูลอ้างอิงหลัก จึงให้คุณครูเป็นผู้แก้ไข ส่วนข้อมูลติดต่อผู้ปกครองสามารถอัปเดตได้ที่นี่</div>
+  <form id="parentEditForm" style="margin-top:14px"><div class="form-grid">
+    <div class="field"><label>เบอร์โทรนักเรียน</label><input id="editStudentPhone" type="tel"></div>
+    <div class="field"><label>ชื่อผู้ปกครอง</label><input id="editGuardianName"></div>
+    <div class="field"><label>ความสัมพันธ์</label><input id="editGuardianRelationship" placeholder="เช่น มารดา / บิดา / ผู้ดูแล"></div>
+    <div class="field"><label>เบอร์โทรผู้ปกครอง</label><input id="editGuardianPhone" type="tel"></div>
+    <div class="field full"><label>ที่อยู่</label><textarea id="editAddress"></textarea></div>
+  </div><div class="form-actions"><button class="btn btn-primary" type="submit">บันทึกการเปลี่ยนแปลง</button><button class="btn btn-ghost" type="button" onclick="ParentApp.closeEdit()">ยกเลิก</button></div></form>
+</div></div>
+<div class="toast" id="parentToast"></div>
+
+<script src="./js/app-data.js"></script>
+<script src="./js/charts.js"></script>
+<script src="./js/usage-chart.js"></script>
+<script src="./js/thaiw-dashboard.js"></script>
+<script src="./js/parent.js"></script>
+</body>
+</html>
