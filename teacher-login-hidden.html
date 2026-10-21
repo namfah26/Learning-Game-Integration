@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ระบบคุณครู</title>
+<link rel="stylesheet" href="./css/app.css">
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+<div id="teacherLogin" class="login-screen">
+  <div class="login-card">
+    <div class="login-icon">👩‍🏫</div>
+    <h1>เข้าสู่ระบบคุณครู</h1>
+    <p>สำหรับคุณครูที่ได้รับอนุญาตเท่านั้น<br>กรุณาติดต่อผู้ดูแลระบบเพื่อขอข้อมูลเข้าสู่ระบบ</p>
+    <div id="teacherLoginError" class="error-box"></div>
+    <div class="field"><label>ชื่อผู้ใช้</label><input id="teacherUsername" autocomplete="username" placeholder="กรอกชื่อผู้ใช้"></div>
+    <div class="field" style="margin-top:12px"><label>รหัสผ่าน</label><input id="teacherPassword" type="password" autocomplete="current-password" placeholder="กรอกรหัสผ่าน"></div>
+    <button class="btn btn-primary btn-block" style="margin-top:16px" onclick="TeacherApp.login()">เข้าสู่ระบบ</button>
+    <div class="login-back"><a href="./index.html">← กลับไปเลือกประเภทผู้ใช้</a></div>
+  </div>
+</div>
+
+<div id="teacherApp" class="hidden">
+  <main class="shell">
+    <div class="topbar">
+      <div class="brand"><span class="brand-badge">🎓</span><span>Learning Game Admin</span></div>
+      <div class="top-actions">
+        <a class="btn btn-ghost" href="./index.html">← หน้าเลือกผู้ใช้</a>
+        <button class="btn btn-danger" onclick="TeacherApp.logout()">ออกจากระบบ</button>
+      </div>
+    </div>
+
+    <header class="hero">
+      <h1>ระบบจัดการเกมการเรียนรู้</h1>
+      <p>จัดการข้อมูลนักเรียน เกม และติดตามผลแบบรายบุคคลโดยไม่ต้องไล่อ่านตารางผลทั้งหมด</p>
+    </header>
+
+    <nav class="nav-tabs" id="teacherNav">
+      <button class="nav-tab active" data-view="dashboard">ภาพรวม</button>
+      <button class="nav-tab" data-view="students">นักเรียน</button>
+      <button class="nav-tab" data-view="games">เกม</button>
+      <button class="nav-tab" data-view="results">ผลการเรียนรู้</button>
+      <button class="nav-tab" data-view="tools">ส่งออก / ระบบ</button>
+    </nav>
+
+    <section id="view-dashboard" class="teacher-view">
+      <div id="dashboardStats" class="grid grid-4"></div>
+      <div class="grid grid-2">
+        <div class="card">
+          <h2>กิจกรรมล่าสุด</h2>
+          <div id="recentUsage"></div>
+        </div>
+        <div class="card">
+          <h2>สถานะระบบ</h2>
+          <div id="systemStatus"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-students" class="teacher-view hidden">
+      <div class="grid grid-2">
+        <div class="card">
+          <h2 id="studentFormTitle">เพิ่มนักเรียน</h2>
+          <form id="studentForm">
+            <input type="hidden" id="studentEditingId">
+            <div class="form-grid">
+              <div class="field"><label>รหัสนักเรียน *</label><input id="studentId" required placeholder="เช่น 6901"></div>
+              <div class="field"><label>ชื่อ-นามสกุล *</label><input id="studentName" required></div>
+              <div class="field"><label>วันเกิด *</label><input id="studentDob" type="date" required></div>
+              <div class="field"><label>เบอร์โทรนักเรียน</label><input id="studentPhone" type="tel" placeholder="ถ้ามี"></div>
+              <div class="field"><label>ชื่อผู้ปกครอง</label><input id="guardianName"></div>
+              <div class="field"><label>ความสัมพันธ์</label><input id="guardianRelationship" placeholder="เช่น มารดา / บิดา / ผู้ดูแล"></div>
+              <div class="field"><label>เบอร์โทรผู้ปกครอง</label><input id="guardianPhone" type="tel"></div>
+              <div class="field full"><label>ที่อยู่</label><textarea id="studentAddress"></textarea></div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">บันทึกข้อมูล</button>
+              <button class="btn btn-ghost hidden" type="button" id="studentCancelEdit" onclick="TeacherApp.cancelStudentEdit()">ยกเลิกแก้ไข</button>
+            </div>
+          </form>
+          <div class="notice" style="margin-top:14px">ไม่เก็บเลขบัตรประชาชนในรุ่นนี้ เพราะรหัสนักเรียนเพียงพอสำหรับการเชื่อมผลเกม และลดข้อมูลส่วนบุคคลที่ไม่จำเป็น</div>
+        </div>
+
+        <div class="card">
+          <h2>นำเข้ารายชื่อจาก Excel</h2>
+          <div class="field"><label>ไฟล์ .xlsx / .xls</label><input type="file" id="studentExcelFile" accept=".xlsx,.xls"></div>
+          <div class="hint" style="margin-top:8px">รองรับหัวคอลัมน์: รหัสนักเรียน, ชื่อ-นามสกุล, วันเกิด, เบอร์โทรนักเรียน, ชื่อผู้ปกครอง, ความสัมพันธ์, เบอร์โทรผู้ปกครอง, ที่อยู่</div>
+          <div class="form-actions">
+            <button class="btn btn-success" type="button" onclick="TeacherApp.importStudents()">นำเข้า Excel</button>
+            <button class="btn btn-soft" type="button" onclick="TeacherApp.exportStudents()">ดาวน์โหลดรายชื่อ</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="profile-head">
+          <div><h2 style="margin-bottom:4px">รายชื่อนักเรียน</h2><div class="hint">กด “ลบ” เมื่อต้องการนำรายชื่อนักเรียนออกจากระบบ โดยประวัติการเล่นเดิมจะยังไม่ถูกลบ</div></div>
+        </div>
+        <div class="search-row">
+          <input id="studentSearch" placeholder="ค้นหาชื่อหรือรหัสนักเรียน">
+        </div>
+        <div id="studentTable"></div>
+      </div>
+    </section>
+
+    <section id="view-games" class="teacher-view hidden">
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="profile-head" style="margin-bottom:10px">
+            <h2 id="gameFormTitle" style="margin:0">เพิ่มเกมการเรียนรู้</h2>
+            <span id="gameLimitStatus" class="badge badge-purple">เกมในระบบ 0/5</span>
+          </div>
+          <form id="gameForm">
+            <input type="hidden" id="gameEditingId">
+            <div class="form-grid">
+              <div class="field full"><label>ชื่อเกม *</label><input id="gameTitle" required></div>
+              <div class="field full"><label>URL / Path เกม *</label><input id="gameUrl" required placeholder="เช่น ./games/my-game/"></div>
+              <div class="field full"><label>คำอธิบายเกม</label><textarea id="gameDescription" placeholder="ข้อความนี้จะแสดงบนหน้าของนักเรียน"></textarea></div>
+              <div class="field full"><label>รูปปกเกม</label><input id="gameImage" type="file" accept="image/*"><div class="hint">ระบบจะย่อและบีบอัดรูปปกให้อัตโนมัติ เพื่อให้ทดลองเพิ่มเกมได้สูงสุด 5 เกมโดยไม่กินพื้นที่ LocalStorage มากเกินไป</div></div>
+              <div class="field full"><label class="checkbox-row"><input id="gameTelemetry" type="checkbox"> เกมนี้ส่งคะแนน/ผลการเล่นกลับระบบได้</label></div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">บันทึกเกม</button>
+              <button class="btn btn-ghost hidden" type="button" id="gameCancelEdit" onclick="TeacherApp.cancelGameEdit()">ยกเลิกแก้ไข</button>
+            </div>
+          </form>
+        </div>
+        <div class="card">
+          <h2>แนวทางเพิ่มเกม</h2>
+          <div class="notice">เกม Web ที่สร้างเองควรอยู่ใต้โฟลเดอร์ <b>games/ชื่อเกม/</b> และใช้ path แบบ <b>./games/ชื่อเกม/</b><br><b>รุ่นทดลองนี้เก็บเกมในรายการได้สูงสุด 5 เกม</b> หากครบแล้วให้ลบเกมที่ไม่ใช้ก่อน โดยผลการเล่นและประวัติเดิมจะยังอยู่จนกว่าจะสั่งล้างประวัติ</div>
+          <div class="notice warn" style="margin-top:10px">ถ้าเกมยังส่งตัวแปรกลับระบบไม่ได้ ระบบยังเก็บเวลาเข้าเล่นได้ และจะแสดงว่า “เกมนี้ยังไม่มีข้อมูลคะแนน”</div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>รายการเกม</h2>
+        <div id="gameList"></div>
+      </div>
+    </section>
+
+    <section id="view-results" class="teacher-view hidden">
+      <div class="card">
+        <h2>เลือกนักเรียนเพื่อดูผล</h2>
+        <div class="search-row"><input id="resultStudentSearch" placeholder="ค้นหาชื่อหรือรหัสนักเรียน"></div>
+        <div id="resultStudentList"></div>
+      </div>
+    </section>
+
+    <section id="view-profile" class="teacher-view hidden">
+      <div class="topbar">
+        <button class="btn btn-ghost" onclick="TeacherApp.showView('results')">← กลับรายชื่อนักเรียน</button>
+      </div>
+      <div id="studentProfile"></div>
+      <div id="studentGameDetail"></div>
+    </section>
+
+    <section id="view-tools" class="teacher-view hidden">
+      <div class="grid grid-2">
+        <div class="card">
+          <h2>ส่งออกข้อมูล</h2>
+          <p class="hint">ไฟล์รวมจะมี Students, Games, UsageHistory, GameResults, StageSummary และ ClickEvents</p>
+          <div class="form-actions">
+            <button class="btn btn-soft" onclick="TeacherApp.exportStudents()">รายชื่อนักเรียน Excel</button>
+            <button class="btn btn-primary" onclick="TeacherApp.exportAll()">ข้อมูลทั้งหมด Excel</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>ฐานข้อมูลกลาง</h2>
+          <div id="backendStatus"></div>
+        </div>
+        <div class="card">
+          <h2>ล้างประวัติการเล่น</h2>
+          <p class="hint">ลบเฉพาะประวัติการเข้าเล่นและผลเกมทั้งหมด โดยไม่ลบรายชื่อนักเรียนหรือรายการเกม</p>
+          <div class="notice warn">คำสั่งนี้จะลบคะแนน, ผล 4 ทิศ, รายละเอียดด่าน, ClickEvents และเวลาเข้าเล่นทั้งหมดจาก LocalStorage และไม่สามารถกู้คืนได้</div>
+          <div class="form-actions">
+            <button class="btn btn-danger" type="button" onclick="TeacherApp.clearHistory()">🗑️ ล้างประวัติการเล่นทั้งหมด</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modal" id="roundModal"><div class="modal-card"><div class="modal-head"><h2>รายละเอียดรอบการเล่น</h2><button class="icon-btn" onclick="TeacherApp.closeRoundModal()">✕</button></div><div id="roundModalBody"></div></div></div>
+<div class="toast" id="teacherToast"></div>
+
+<script src="./js/app-data.js"></script>
+<script src="./js/backend-config.js"></script>
+<script src="./js/charts.js"></script>
+<script src="./js/usage-chart.js"></script>
+<script src="./js/thaiw-dashboard.js"></script>
+<script src="./js/teacher.js"></script>
+</body>
+</html>
